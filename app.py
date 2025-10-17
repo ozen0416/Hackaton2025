@@ -10,7 +10,7 @@ import plotly.express as px
 # --------------------------------------------
 # 0) CONFIG STREAMLIT (doit être la 1ère commande)
 # --------------------------------------------
-st.set_page_config(page_title="Fermetures & Survie 24m & Aides État", layout="wide")
+st.set_page_config(page_title="Analyse des chances de survie d'une entreprise en fonction des mesures prises par l'État à 24 mois post-covid", layout="wide")
 
 # --------------------------------------------
 # 1) CHARGEMENT & PRÉPARATION DES DONNÉES
@@ -80,7 +80,7 @@ except Exception as e:
 # --------------------------------------------
 # 2) EN-TÊTE
 # --------------------------------------------
-st.title("📊 Fermetures d’entreprises (2020–2024) • 💡 Survie 24m (cohorte 2020) • 🟦 Aides de l’État")
+st.title("Analyse des chances de survie d'une entreprise en fonction des mesures prises par l'État à 24 mois post-covid")
 st.caption("La survie 24 mois est interprétée **à partir de la cohorte 2020** (variable `Survie_24m` fournie).")
 
 st.divider()
@@ -88,7 +88,7 @@ st.divider()
 # =====================================================
 # === PARTIE 1 — FERMETURES (analyse principale)    ===
 # =====================================================
-st.header("🟥 Partie 1 — Analyse des fermetures")
+st.header("Partie 1 — Analyse des fermetures d'entreprise")
 
 # KPI
 col1, col2, col3 = st.columns(3)
@@ -99,13 +99,13 @@ nb_fermees = (
 )
 tx_ferm_glob = (nb_fermees / nb_total * 100) if nb_total else 0.0
 
-col1.metric("🏢 Entreprises analysées", f"{nb_total:,}")
-col2.metric("⚰️ Entreprises fermées", f"{nb_fermees:,}")
-col3.metric("📉 Taux global de fermeture", f"{tx_ferm_glob:.2f} %")
+col1.metric("Entreprises analysées", f"{nb_total:,}")
+col2.metric("Entreprises fermées", f"{nb_fermees:,}")
+col3.metric("Taux global de fermeture", f"{tx_ferm_glob:.2f} %")
 st.divider()
 
 # Camembert fermetures / catégorie (toutes années)
-st.subheader("🥧 Répartition des **fermetures** par **catégorie d’entreprise**")
+st.subheader("Répartition des **fermetures** par **catégorie d’entreprise**")
 if {"etatAdministratifUniteLegale", "categorieEntreprise", "siren"}.issubset(df.columns):
     ferm_cat = (
         df.loc[df["etatAdministratifUniteLegale"] == "C"]
@@ -131,7 +131,7 @@ else:
 st.divider()
 
 # Taux de fermeture par année
-st.subheader("📉 Taux de **fermeture** par **année**")
+st.subheader("Taux de **fermeture** par **année**")
 if {"annee", "etatAdministratifUniteLegale"}.issubset(df.columns) and df["annee"].notna().any():
     ferm = df.groupby(["annee", "etatAdministratifUniteLegale"]).size().reset_index(name="count")
     totaux = ferm.groupby("annee")["count"].sum().reset_index(name="total")
@@ -152,7 +152,7 @@ else:
 st.divider()
 
 # Ancienneté × fermeture
-st.subheader("⏳ Impact de **l’ancienneté** sur le **taux de fermeture**")
+st.subheader("Impact de **l’ancienneté** sur le **taux de fermeture**")
 if "anciennete" in df.columns and df["anciennete"].notna().any():
     bins_age = [0, 5, 10, 20, 30, 50, 100, np.inf]
     labels_age = ["0–5", "5–10", "10–20", "20–30", "30–50", "50–100", "100+"]
@@ -180,7 +180,7 @@ else:
 st.divider()
 
 # Effectifs × fermeture (hors NN & 00)
-st.subheader("👥 Taux de **fermeture** par **tranche d’effectif salarié** (hors 'NN' & '00')")
+st.subheader("Taux de **fermeture** par **tranche d’effectif salarié**")
 if "trancheEffectifsUniteLegale" in df.columns:
     df_eff = df.loc[~df["trancheEffectifsUniteLegale"].isin(["NN", "00"])].copy()
     tr_map = {
@@ -219,7 +219,7 @@ st.divider()
 # =====================================================
 # === PARTIE 2 — SURVIE 24 MOIS (COHORTE 2020)     ===
 # =====================================================
-st.header("🟩 Partie 2 — Survie à 24 mois (cohorte 2020, `Survie_24m` fournie)")
+st.header("Partie 2 — Analyse des chances de survie à 24 mois des entreprises")
 
 needed_cols = {"siren", "annee", "Survie_24m"}
 if not needed_cols.issubset(df.columns):
@@ -243,14 +243,14 @@ else:
         taux_survie_global = cohort["Survie_24m"].mean() * 100
         nb_survivantes = int(cohort["Survie_24m"].sum())
         nb_non_survivantes = int((cohort["Survie_24m"] == 0).sum())
-        c1.metric("🏢 Cohorte 2020 (entreprises)", f"{nb_cohorte:,}")
-        c2.metric("📈 Survivantes à 24 mois", f"{nb_survivantes:,}")
-        c3.metric("💡 Taux de survie (24m)", f"{taux_survie_global:.2f} %")
+        c1.metric("Cohorte 2020 (entreprises)", f"{nb_cohorte:,}")
+        c2.metric("Survivantes à 24 mois", f"{nb_survivantes:,}")
+        c3.metric("Taux de survie (24m)", f"{taux_survie_global:.2f} %")
         st.caption("Les profils analysés (catégorie, ancienneté, effectifs) sont ceux **observés en 2020**.")
         st.divider()
 
         # Camembert — survivantes par catégorie (2020)
-        st.subheader("🥧 Répartition des **survivantes (24m)** par **catégorie d’entreprise** — cohorte 2020")
+        st.subheader("Répartition des **survivantes (24m)** par **catégorie d’entreprise**")
         if "categorieEntreprise" in cohort.columns:
             surv_cat_counts = (
                 cohort.loc[cohort["Survie_24m"] == 1]
@@ -275,7 +275,7 @@ else:
         st.divider()
 
         # Taux de survie par catégorie (2020)
-        st.subheader("🏢 Taux de **survie (24m)** par **catégorie d’entreprise** — cohorte 2020")
+        st.subheader("Taux de **survie** par **catégorie d’entreprise**")
         if "categorieEntreprise" in cohort.columns:
             survie_par_cat = (
                 cohort.groupby("categorieEntreprise")["Survie_24m"]
@@ -296,7 +296,7 @@ else:
         st.divider()
 
         # Ancienneté × survie (2020)
-        st.subheader("⏳ **Ancienneté (2020)** × **Survie (24m)** — cohorte 2020")
+        st.subheader("**Ancienneté (2020)** × **Survie (24m)**")
         if "anciennete" in cohort.columns and cohort["anciennete"].notna().any():
             bins_age = [0, 5, 10, 20, 30, 50, 100, np.inf]
             labels_age = ["0–5", "5–10", "10–20", "20–30", "30–50", "50–100", "100+"]
@@ -322,7 +322,7 @@ else:
         st.divider()
 
         # Effectifs × survie (2020) hors NN & 00
-        st.subheader("👥 **Survie (24m)** par **tranche d’effectif (2020)** — hors 'NN' & '00'")
+        st.subheader("**Survie (24m)** par **tranche d’effectif (2020)**")
         if "trancheEffectifsUniteLegale" in cohort.columns:
             cohort_eff = cohort.loc[~cohort["trancheEffectifsUniteLegale"].isin(["NN", "00"])].copy()
             tr_map = {
@@ -360,7 +360,7 @@ st.divider()
 # =====================================================
 # === PARTIE 3 — Aides de l'État (focus) & lien survie
 # =====================================================
-st.header("🟦 Partie 3 — Aides de l'État (focus) & lien avec la survie 24m")
+st.header("Partie 3 — Aides de l'État & lien avec la survie des entreprises")
 
 if dfa.empty:
     st.info("Aucune donnée d’aide d’État chargée pour cette section.")
@@ -383,9 +383,9 @@ else:
             gini = np.nan
 
         c1, c2, c3 = st.columns(3)
-        c1.metric("💶 Aides de l'État — Total", f"{total_etat:,.0f}".replace(",", " "))
-        c2.metric("🏆 Part des 3 plus grosses catégories", f"{top3_share:.1f} %" if not np.isnan(top3_share) else "n/d")
-        c3.metric("📈 Indice de concentration (Gini)", f"{gini:.2f}" if not np.isnan(gini) else "n/d")
+        c1.metric("Aides de l'État — Total", f"{total_etat:,.0f}".replace(",", " "))
+        c2.metric("Part des 3 plus grosses catégories", f"{top3_share:.1f} %" if not np.isnan(top3_share) else "n/d")
+        c3.metric("Indice de concentration (Gini)", f"{gini:.2f}" if not np.isnan(gini) else "n/d")
         st.caption("Plus Gini → plus les aides sont concentrées.")
         st.divider()
 
@@ -409,11 +409,6 @@ else:
             fig_cat_pie.update_traces(textinfo="percent+label")
             st.plotly_chart(fig_cat_pie, use_container_width=True)
 
-            st.download_button(
-                "📥 Télécharger la répartition par catégorie (CSV)",
-                data=cat_agg.to_csv(index=False).encode("utf-8"),
-                file_name="aides_etat_par_categorie.csv",
-            )
         else:
             st.info("Aucune agrégation par catégorie.")
     else:
@@ -424,7 +419,7 @@ else:
 # === PARTIE 4 — Test simple : Chi² / Fisher
 # === Survie 24m vs groupes d'intensité d'aide (catégories)
 # =====================================================
-st.header("🟪 Partie 4 — Test simple : Chi² / Fisher")
+st.header("Partie 4 — Test simple : Chi² / Fisher")
 
 # Hypothèses affichées dans le dashboard
 st.markdown(
@@ -478,7 +473,7 @@ else:
             # 🔎 Petite explication de l'intensité (affichée avant le test)
             st.markdown(
                 """
-**🔎 Qu’entend-on par _intensité d’aide_ ?**  
+**Qu’entend-on par _intensité d’aide_ ?**  
 L’**intensité** est le **montant moyen d’aide de l’État par entreprise** dans une **catégorie d’entreprise** (cohorte 2020) :
 
 \\[
@@ -552,10 +547,10 @@ L’**intensité** est le **montant moyen d’aide de l’État par entreprise**
 
                     colA, colB = st.columns(2)
                     with colA:
-                        st.subheader("📋 Table de contingence (n)")
+                        st.subheader("Table de contingence (n)")
                         st.dataframe(tab, use_container_width=True)
                     with colB:
-                        st.subheader("📊 Taux de survie 24m par groupe")
+                        st.subheader("Taux de survie 24m par groupe")
                         fig_rates = px.bar(
                             surv_by_group, x="groupe_intensite", y="taux_survie_%",
                             text="taux_survie_%",
@@ -573,7 +568,7 @@ L’**intensité** est le **montant moyen d’aide de l’État par entreprise**
                     except Exception:
                         has_scipy = False
 
-                    st.subheader("✅ Test d’indépendance (Survie × Groupe d’intensité) — Décision")
+                    st.subheader("Test d’indépendance (Survie × Groupe d’intensité) — Décision")
                     if has_scipy:
                         if tab.shape == (2, 2):
                             # Test exact de Fisher si 2 groupes × 2 issues
@@ -590,10 +585,10 @@ L’**intensité** est le **montant moyen d’aide de l’État par entreprise**
 
                         # Décision
                         if p_value < float(alpha):
-                            st.success(f"🎯 **Décision** : p = {p_value:.4f} < α = {alpha} → **Rejet de H0**. "
+                            st.success(f"**Décision** : p = {p_value:.4f} < α = {alpha} → **Rejet de H0**. "
                                        "Les taux de survie **diffèrent selon le niveau d’intensité d’aide** (dépendance).")
                         else:
-                            st.info(f"ℹ️ **Décision** : p = {p_value:.4f} ≥ α = {alpha} → **Non-rejet de H0**. "
+                            st.info(f"ℹ**Décision** : p = {p_value:.4f} ≥ α = {alpha} → **Non-rejet de H0**. "
                                     f"Pas d’évidence suffisante que les taux de survie diffèrent selon l’intensité (au seuil {alpha}).")
                     else:
                         st.warning("SciPy n'est pas disponible : installe `scipy` pour exécuter le test du Chi² / Fisher.")
